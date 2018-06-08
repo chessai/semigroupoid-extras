@@ -19,7 +19,7 @@ module Data.Semifunctor.Associative where
 
 import Prelude hiding ((.), id)
 import Control.Arrow
-import Data.Functor.Bind
+import Data.Functor.Semimonad
 import Data.Semifunctor
 -- import Data.Isomorphism
 
@@ -42,10 +42,10 @@ instance Associative (->) (Bi (,)) where
 kleisliAssociate :: (Monad m, Semifunctor p (Product (Kleisli m) (Kleisli m)) (Kleisli m), Associative (->) p) => Kleisli m (p '(p '(a,b),c)) (p '(a,p '(b,c)))
 kleisliAssociate = Kleisli (return . associate)
 
-instance (Bind m, Monad m) => Associative (Kleisli m) (Bi Either) where
+instance (Semimonad m, Monad m) => Associative (Kleisli m) (Bi Either) where
   associate = kleisliAssociate
 
-instance (Bind m, Monad m) => Associative (Kleisli m) (Bi (,)) where
+instance (Semimonad m, Monad m) => Associative (Kleisli m) (Bi (,)) where
   associate = kleisliAssociate
 
 #ifdef MIN_VERSION_comonad
@@ -75,10 +75,10 @@ instance Disassociative (->) (Bi (,)) where
 kleisliDisassociate :: (Monad m, Semifunctor p (Product (Kleisli m) (Kleisli m)) (Kleisli m), Disassociative (->) p) => Kleisli m (p '(a,p '(b,c))) (p '(p '(a,b),c))
 kleisliDisassociate = Kleisli (return . disassociate)
 
-instance (Bind m, Monad m) => Disassociative (Kleisli m) (Bi Either) where
+instance (Semimonad m, Monad m) => Disassociative (Kleisli m) (Bi Either) where
   disassociate = kleisliDisassociate
 
-instance (Bind m, Monad m) => Disassociative (Kleisli m) (Bi (,)) where
+instance (Semimonad m, Monad m) => Disassociative (Kleisli m) (Bi (,)) where
   disassociate = kleisliDisassociate
 
 #ifdef MIN_VERSION_comonad

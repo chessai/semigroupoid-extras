@@ -38,7 +38,7 @@ module Data.Semifunctor.Braided
 
 import Prelude hiding ((.), id)
 import Control.Arrow
-import Data.Functor.Bind
+import Data.Functor.Semimonad
 import Data.Semifunctor
 import Data.Semifunctor.Associative
 -- import Data.Semigroupoid.Dual
@@ -63,10 +63,10 @@ instance Braided (->) (Bi (,)) where
 kleisliBraid :: (Monad m, Semifunctor p (Product (Kleisli m) (Kleisli m)) (Kleisli m), Braided (->) p) => Kleisli m (p '(a,b)) (p '(b,a))
 kleisliBraid = Kleisli (return . braid)
 
-instance (Bind m, Monad m) => Braided (Kleisli m) (Bi Either) where
+instance (Semimonad m, Monad m) => Braided (Kleisli m) (Bi Either) where
   braid = kleisliBraid
 
-instance (Bind m, Monad m) => Braided (Kleisli m) (Bi (,)) where
+instance (Semimonad m, Monad m) => Braided (Kleisli m) (Bi (,)) where
   braid = kleisliBraid
 
 #ifdef MIN_VERSION_comonad
@@ -83,8 +83,8 @@ instance (Extend w, Comonad w) => Braided (Cokleisli w) (Bi (,)) where
 class Braided k p => Symmetric k p
 instance Symmetric (->) (Bi Either)
 instance Symmetric (->) (Bi (,))
-instance (Bind m, Monad m) => Symmetric (Kleisli m) (Bi Either)
-instance (Bind m, Monad m) => Symmetric (Kleisli m) (Bi (,))
+instance (Semimonad m, Monad m) => Symmetric (Kleisli m) (Bi Either)
+instance (Semimonad m, Monad m) => Symmetric (Kleisli m) (Bi (,))
 #ifdef MIN_VERSION_comonad
 instance (Extend w, Comonad w) => Symmetric (Cokleisli w) (Bi (,))
 -- instance Comonad w => Symmetric (Cokleisli w) (Bi Either)

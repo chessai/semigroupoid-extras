@@ -40,7 +40,7 @@ module Data.Semifunctor
   , first
   , second
   , WrappedFunctor(..)
-  , WrappedTraversable1(..)
+  , WrappedSemitraversable(..)
   , module Control.Category
   , module Data.Semigroupoid
   , module Data.Semigroupoid.Ob
@@ -50,9 +50,9 @@ module Data.Semifunctor
 import Control.Arrow hiding (first, second, left, right)
 import Control.Category
 import Control.Monad (liftM)
-import Data.Functor.Bind
+import Data.Functor.Semimonad
 import Data.Traversable
-import Data.Semigroup.Traversable
+import Data.Semigroup.Semitraversable
 import Data.Semigroupoid
 import Data.Semigroupoid.Dual
 import Data.Semigroupoid.Ob
@@ -78,7 +78,7 @@ data WrappedFunctor f a = WrapFunctor { unwrapFunctor :: f a }
 instance Functor f => Semifunctor (WrappedFunctor f) (->) (->) where
   semimap f = WrapFunctor . fmap f . unwrapFunctor
 
-instance (Traversable f, Bind m, Monad m) => Semifunctor (WrappedFunctor f) (Kleisli m) (Kleisli m) where
+instance (Traversable f, Semimonad m, Monad m) => Semifunctor (WrappedFunctor f) (Kleisli m) (Kleisli m) where
   semimap (Kleisli f) = Kleisli $ liftM WrapFunctor . mapM f . unwrapFunctor
 
 #if defined(MIN_VERSION_distributive) && defined(MIN_VERSION_comonad)
@@ -86,10 +86,10 @@ instance (Distributive f, Extend w) => Semifunctor (WrappedFunctor f) (Cokleisli
   semimap (Cokleisli w) = Cokleisli $ WrapFunctor . cotraverse w . fmap unwrapFunctor
 #endif
 
-data WrappedTraversable1 f a = WrapTraversable1 { unwrapTraversable1 :: f a }
+data WrappedSemitraversable f a = WrapSemitraversable { unwrapSemitraversable :: f a }
 
-instance (Traversable1 f, Bind m) => Semifunctor (WrappedTraversable1 f) (Kleisli m) (Kleisli m) where
-  semimap (Kleisli f) = Kleisli $ fmap WrapTraversable1 . traverse1 f . unwrapTraversable1
+instance (Semitraversable f, Semimonad m) => Semifunctor (WrappedSemitraversable f) (Kleisli m) (Kleisli m) where
+  semimap (Kleisli f) = Kleisli $ fmap WrapSemitraversable . semitraverse f . unwrapSemitraversable
 
 -- | Used to map a more traditional bifunctor into a semifunctor
 data Bi p a where
@@ -122,10 +122,10 @@ instance Semifunctor (Bi Either) (Product (->) (->)) (->) where
   semimap (Pair l _) (Bi (Left a)) = Bi (Left (l a))
   semimap (Pair _ r) (Bi (Right b)) = Bi (Right (r b))
 
-instance Bind m => Semifunctor (Bi (,)) (Product (Kleisli m) (Kleisli m)) (Kleisli m) where
+instance Semimonad m => Semifunctor (Bi (,)) (Product (Kleisli m) (Kleisli m)) (Kleisli m) where
   semimap (Pair l r) = Kleisli (\ (Bi (a, b)) -> (#) <$> runKleisli l a <.> runKleisli r b)
 
-instance Bind m => Semifunctor (Bi Either) (Product (Kleisli m) (Kleisli m)) (Kleisli m) where
+instance Semimonad m => Semifunctor (Bi Either) (Product (Kleisli m) (Kleisli m)) (Kleisli m) where
   semimap (Pair (Kleisli l0) (Kleisli r0)) = Kleisli (lr l0 r0) where
     lr :: Functor m => (a -> m c) -> (b -> m d) -> Bi Either '(a,b) -> m (Bi Either '(c,d))
     lr l _ (Bi (Left a))  = left <$> l a
